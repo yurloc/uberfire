@@ -438,10 +438,6 @@ blockquote cite {
     color: #555
 }
 
-blockquote cite::before {
-    content: "—  ";
-}
-
 /* 10. Video block */
 
 .block .content-box {
@@ -651,7 +647,7 @@ footer {
     margin-top: 14px
 }
 
-#social-share {
+#howto-panels {
     text-align: center;
     height: 66px;
     background: #ededed;
@@ -664,7 +660,7 @@ footer {
     width: 100%
 }
 
-#social-share p {
+#howto-panels p {
     font-size: 31px;
     float: left;
     margin: 8px 14px 0 180px;
@@ -675,8 +671,24 @@ footer {
     letter-spacing: -2px
 }
 
-#social-share {
-    margin: 35px 0 0 0;
+a.howto-link:link {
+    color: #777;
+    font-weight: bold;
+}
+
+a.howto-link:visited {
+    color: #777;
+    font-weight: bold;
+}
+
+a.howto-link:hover {
+    color: #777;
+    font-weight: bold;
+}
+
+a.howto-link:active {
+    color: #777;
+    font-weight: bold;
 }
 
 #shareme {
