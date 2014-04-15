@@ -22,6 +22,8 @@ import org.uberfire.user.management.model.UserInformation;
 
 public interface UserManagementView extends UberView<UserManagementPresenter> {
 
+    void setUserManagerAvailable( final boolean isUserManagerAvailable );
+
     void setContent( final List<UserInformation> userInformation,
                      final boolean isReadOnly );
 

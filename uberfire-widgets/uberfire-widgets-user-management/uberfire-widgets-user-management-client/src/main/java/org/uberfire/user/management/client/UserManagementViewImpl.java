@@ -17,157 +17,80 @@ package org.uberfire.user.management.client;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CellTable;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.uberfire.client.common.ButtonCell;
-import org.uberfire.client.tables.ResizableHeader;
-import org.uberfire.commons.validation.PortablePreconditions;
-import org.uberfire.user.management.client.resources.i18n.UserManagementConstants;
-import org.uberfire.user.management.client.utils.UserManagementUtils;
 import org.uberfire.user.management.model.UserInformation;
 
-public class UserManagementViewImpl extends Composite implements UserManagementView {
+public class UserManagementViewImpl extends Composite implements RequiresResize,
+                                                                 UserManagementView {
 
-    private UserManagementPresenter presenter;
-
-    interface ViewBinder
+    interface UserManagementViewImplBinder
             extends
             UiBinder<Widget, UserManagementViewImpl> {
 
     }
 
-    @UiField(provided = true)
-    CellTable<UserInformation> table = new CellTable<UserInformation>();
+    @Inject
+    private UserManagerWidget userManagerWidget;
+
+    @Inject
+    private NoUserManagerInstalledWidget noUserManagerInstalledWidget;
 
     @UiField
-    FluidContainer container;
+    SimplePanel container;
 
-    @UiField
-    Button addUserButton;
-
-    private boolean isReadOnly = false;
-    private ButtonCell deleteUserButton;
-    private ButtonCell editUserButton;
-
-    private static ViewBinder uiBinder = GWT.create( ViewBinder.class );
+    private static UserManagementViewImplBinder uiBinder = GWT.create( UserManagementViewImplBinder.class );
 
     @PostConstruct
     public void init() {
         initWidget( uiBinder.createAndBindUi( this ) );
+    }
 
-        //Setup table
-        table.setEmptyTableWidget( new Label( UserManagementConstants.INSTANCE.noUsersDefined() ) );
-
-        //Columns
-        final TextColumn<UserInformation> userNameColumn = new TextColumn<UserInformation>() {
-
-            @Override
-            public String getValue( final UserInformation userInformation ) {
-                return userInformation.getUserName();
-            }
-        };
-
-        final TextColumn<UserInformation> userRolesColumn = new TextColumn<UserInformation>() {
-
-            @Override
-            public String getValue( final UserInformation userInformation ) {
-                return UserManagementUtils.convertUserRoles( userInformation.getUserRoles() );
-            }
-
-        };
-
-        editUserButton = new ButtonCell( ButtonSize.SMALL );
-        editUserButton.setType( ButtonType.DEFAULT );
-        editUserButton.setIcon( IconType.EDIT );
-        final Column<UserInformation, String> editUserColumn = new Column<UserInformation, String>( editUserButton ) {
-            @Override
-            public String getValue( final UserInformation userInformation ) {
-                return UserManagementConstants.INSTANCE.edit();
-            }
-        };
-        editUserColumn.setFieldUpdater( new FieldUpdater<UserInformation, String>() {
-            public void update( final int index,
-                                final UserInformation userInformation,
-                                final String value ) {
-                if ( isReadOnly ) {
-                    return;
-                }
-                presenter.editUser( userInformation );
-            }
-        } );
-
-        deleteUserButton = new ButtonCell( ButtonSize.SMALL );
-        deleteUserButton.setType( ButtonType.DANGER );
-        deleteUserButton.setIcon( IconType.MINUS_SIGN );
-        final Column<UserInformation, String> deleteUserColumn = new Column<UserInformation, String>( deleteUserButton ) {
-            @Override
-            public String getValue( final UserInformation userInformation ) {
-                return UserManagementConstants.INSTANCE.remove();
-            }
-        };
-        deleteUserColumn.setFieldUpdater( new FieldUpdater<UserInformation, String>() {
-            public void update( final int index,
-                                final UserInformation userInformation,
-                                final String value ) {
-                if ( isReadOnly ) {
-                    return;
-                }
-                if ( Window.confirm( UserManagementConstants.INSTANCE.promptForRemovalOfUser0( userInformation.getUserName() ) ) ) {
-                    presenter.deleteUser( userInformation );
-                }
-            }
-        } );
-
-        table.addColumn( userNameColumn,
-                         new ResizableHeader( UserManagementConstants.INSTANCE.userName(),
-                                              table,
-                                              userNameColumn ) );
-        table.addColumn( userRolesColumn,
-                         new ResizableHeader( UserManagementConstants.INSTANCE.userRoles(),
-                                              table,
-                                              userRolesColumn ) );
-        table.addColumn( editUserColumn,
-                         UserManagementConstants.INSTANCE.edit() );
-        table.addColumn( deleteUserColumn,
-                         UserManagementConstants.INSTANCE.remove() );
+    @Override
+    public void setUserManagerAvailable( final boolean isUserManagerAvailable ) {
+        container.clear();
+        if ( isUserManagerAvailable ) {
+            container.setWidget( userManagerWidget );
+        } else {
+            container.setWidget( noUserManagerInstalledWidget );
+            onResize();
+        }
     }
 
     @Override
     public void init( final UserManagementPresenter presenter ) {
-        this.presenter = PortablePreconditions.checkNotNull( "presenter",
-                                                             presenter );
+        userManagerWidget.init( presenter );
     }
 
     @Override
     public void setContent( final List<UserInformation> userInformation,
                             final boolean isReadOnly ) {
-        this.isReadOnly = isReadOnly;
-        this.table.setRowData( userInformation );
-        addUserButton.setEnabled( !isReadOnly );
-        editUserButton.setEnabled( !isReadOnly );
-        deleteUserButton.setEnabled( !isReadOnly );
+        userManagerWidget.setContent( userInformation,
+                                      isReadOnly );
     }
 
-    @UiHandler(value = "addUserButton")
-    public void onClickAddUserButton( final ClickEvent event ) {
-        presenter.addUser();
+    @Override
+    public void onResize() {
+        if ( getParent() == null ) {
+            return;
+        }
+        final IsWidget child = container.getWidget();
+        if ( !( child instanceof RequiresResize ) ) {
+            return;
+        }
+        int height = getParent().getOffsetHeight();
+        int width = getParent().getOffsetWidth();
+        container.setPixelSize( width,
+                                height );
+        ( (RequiresResize) child ).onResize();
     }
 
 }

@@ -16,75 +16,126 @@
 package org.uberfire.user.management.server;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.enterprise.context.Dependent;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.uberfire.user.management.model.UserInformation;
 import org.uberfire.user.management.model.UserInformationWithPassword;
 import org.uberfire.user.management.service.UserManagementService;
+import org.uberfire.user.management.service.UserManager;
 
 @Service
-@Dependent
+@ApplicationScoped
 public class UserManagementServiceImpl implements UserManagementService {
+
+    private static final Logger logger = LoggerFactory.getLogger( UserManagementServiceImpl.class );
+
+    @Inject
+    private Instance<UserManager> availableUserManagers;
+
+    private UserManager userManager;
+
+    @PostConstruct
+    public void initUserManager() {
+        if ( availableUserManagers.isUnsatisfied() ) {
+            logger.info( "No UserManager available. User management will therefore not be available." );
+        } else if ( !availableUserManagers.isAmbiguous() ) {
+            userManager = availableUserManagers.get();
+            logger.info( "Installing UserManager '" + userManager.getClass().getName() + "'." );
+        } else {
+            userManager = availableUserManagers.iterator().next();
+            logger.info( "Multiple UserManagers detected." );
+            logger.info( "Installing UserManager '" + userManager.getClass().getName() + "'." );
+        }
+    }
 
     @Override
     public boolean isUserManagerInstalled() {
-        return false;
+        return userManager != null;
     }
 
     @Override
     public List<UserInformation> getUsers() {
-        return getUserInformation();
-    }
+        if ( userManager == null ) {
+            throw new IllegalStateException( "UserManager has not been installed." );
+        }
 
-    private List<UserInformation> getUserInformation() {
+        logger.info( "Retrieving list of users using '" + userManager.getClass().getName() + "'." );
+
+        final Set<String> userNames = userManager.getUserNames();
         final List<UserInformation> userInformation = new ArrayList<UserInformation>();
-        userInformation.add( new UserInformation( "manstis",
-                                                  new HashSet<String>() {{
-                                                      add( "admin" );
-                                                  }} ) );
+        for ( String userName : userNames ) {
+            userInformation.add( new UserInformation( userName,
+                                                      userManager.getUserRoles( userName ) ) );
+        }
+
         return userInformation;
     }
 
     @Override
-    public void deleteUser( UserInformation userInformation ) {
-        final String userName = userInformation.getUserName();
-        System.out.println( "Delete User" );
-        System.out.println( "User Name: " + userName );
-    }
-
-    @Override
     public void addUser( final UserInformationWithPassword userInformation ) {
+        if ( userManager == null ) {
+            throw new IllegalStateException( "UserManager has not been installed." );
+        }
         final String userName = userInformation.getUserName();
         final String userPassword = userInformation.getUserPassword();
         final Set<String> userRoles = userInformation.getUserRoles();
-        System.out.println( "Add User" );
-        System.out.println( "User Name: " + userName );
-        System.out.println( "User Password: " + userPassword );
-        System.out.println( "User Roles: " + userRoles );
+
+        logger.info( "Adding user '" + userName + "' using '" + userManager.getClass().getName() + "'." );
+
+        userManager.addUser( userName,
+                             userPassword,
+                             userRoles );
     }
 
     @Override
     public void updateUser( final UserInformation userInformation ) {
+        if ( userManager == null ) {
+            throw new IllegalStateException( "UserManager has not been installed." );
+        }
         final String userName = userInformation.getUserName();
         final Set<String> userRoles = userInformation.getUserRoles();
-        System.out.println( "Update User" );
-        System.out.println( "User Name: " + userName );
-        System.out.println( "User Roles: " + userRoles );
+
+        logger.info( "Updating user '" + userName + "' using '" + userManager.getClass().getName() + "'." );
+
+        userManager.updateUserRoles( userName,
+                                     userRoles );
     }
 
     @Override
     public void updateUser( final UserInformationWithPassword userInformation ) {
+        if ( userManager == null ) {
+            throw new IllegalStateException( "UserManager has not been installed." );
+        }
         final String userName = userInformation.getUserName();
         final String userPassword = userInformation.getUserPassword();
         final Set<String> userRoles = userInformation.getUserRoles();
-        System.out.println( "Update User" );
-        System.out.println( "User Name: " + userName );
-        System.out.println( "User Password: " + userPassword );
-        System.out.println( "User Roles: " + userRoles );
+
+        logger.info( "Updating user '" + userName + "' using '" + userManager.getClass().getName() + "'." );
+
+        userManager.updateUserPassword( userName,
+                                        userPassword );
+        userManager.updateUserRoles( userName,
+                                     userRoles );
+    }
+
+    @Override
+    public void deleteUser( final UserInformation userInformation ) {
+        if ( userManager == null ) {
+            throw new IllegalStateException( "UserManager has not been installed." );
+        }
+        final String userName = userInformation.getUserName();
+
+        logger.info( "Deleting user '" + userName + "' using '" + userManager.getClass().getName() + "'." );
+
+        userManager.deleteUser( userName );
     }
 
 }

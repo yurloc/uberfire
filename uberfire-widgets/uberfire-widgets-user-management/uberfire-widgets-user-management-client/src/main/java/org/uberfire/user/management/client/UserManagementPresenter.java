@@ -19,7 +19,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
@@ -46,9 +45,6 @@ public class UserManagementPresenter {
     private UserManagementView view;
 
     @Inject
-    private NoUserManagerInstalledWidget noUserManagerInstalledView;
-
-    @Inject
     private AddUserPopup addUserPopup;
 
     @Inject
@@ -59,7 +55,6 @@ public class UserManagementPresenter {
 
     private PlaceRequest place;
     private boolean isReadOnly;
-    private boolean isUserManagerInstalled;
 
     @OnStartup
     public void onStartup( final PlaceRequest place ) {
@@ -69,8 +64,9 @@ public class UserManagementPresenter {
         userManagementService.call( new RemoteCallback<Boolean>() {
             @Override
             public void callback( final Boolean result ) {
-                isUserManagerInstalled = Boolean.TRUE.equals( result );
-                if ( isUserManagerInstalled ) {
+                final boolean isUserManagerAvailable = Boolean.TRUE.equals( result );
+                view.setUserManagerAvailable( isUserManagerAvailable );
+                if ( isUserManagerAvailable ) {
                     init();
                 }
             }
@@ -103,11 +99,8 @@ public class UserManagementPresenter {
     }
 
     @WorkbenchPartView
-    public IsWidget getView() {
-        if ( isUserManagerInstalled ) {
-            return view;
-        }
-        return noUserManagerInstalledView;
+    public UberView<UserManagementPresenter> getView() {
+        return view;
     }
 
     public void addUser() {
