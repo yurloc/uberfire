@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.uberfire.user.management.server.usermanagers;
+package org.uberfire.user.management.server.bridges.debug;
 
 import java.util.HashMap;
 import java.util.HashSet;
