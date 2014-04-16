@@ -150,6 +150,11 @@ public class UserManagerViewImpl extends Composite implements UserManagementView
                          UserManagementConstants.INSTANCE.edit() );
         table.addColumn( deleteUserColumn,
                          UserManagementConstants.INSTANCE.remove() );
+
+        //Default to disabled, until we know what features are supported
+        addUserButton.setEnabled( false );
+        editUserButton.setEnabled( false );
+        deleteUserButton.setEnabled( false );
     }
 
     @Override

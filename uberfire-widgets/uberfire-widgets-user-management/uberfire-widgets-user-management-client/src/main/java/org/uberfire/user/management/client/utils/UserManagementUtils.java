@@ -27,10 +27,21 @@ public class UserManagementUtils {
      */
     public static String convertUserRoles( final Set<String> roles ) {
         final StringBuilder sb = new StringBuilder();
-        for ( String role : roles ) {
-            sb.append( role ).append( ", " );
+        if ( roles == null || roles.isEmpty() ) {
+            return sb.toString();
         }
-        return sb.substring( 0, sb.length() - 2 );
+        boolean addedRoles = false;
+        for ( String role : roles ) {
+            if ( !( role == null || role.isEmpty() ) ) {
+                sb.append( role ).append( ", " );
+                addedRoles = true;
+            }
+        }
+        if ( addedRoles ) {
+            sb.delete( sb.length() - 2,
+                       sb.length() );
+        }
+        return sb.toString();
     }
 
     /**
@@ -44,7 +55,10 @@ public class UserManagementUtils {
             return userRoles;
         }
         for ( String role : roles.split( "," ) ) {
-            userRoles.add( role.trim() );
+            final String trimmed = role.trim();
+            if ( !trimmed.isEmpty() ) {
+                userRoles.add( role.trim() );
+            }
         }
         return userRoles;
     }

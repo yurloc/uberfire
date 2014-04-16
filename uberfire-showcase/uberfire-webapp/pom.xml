@@ -69,7 +69,7 @@
 
     <dependency>
       <groupId>org.uberfire</groupId>
-      <artifactId>uberfire-widgets-user-management-bridges-debug</artifactId>
+      <artifactId>uberfire-widgets-user-management-bridges-properties-file</artifactId>
     </dependency>
 
     <dependency>

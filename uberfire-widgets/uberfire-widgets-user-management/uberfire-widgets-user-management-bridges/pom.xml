@@ -16,6 +16,7 @@
 
   <modules>
     <module>uberfire-widgets-user-management-bridges-debug</module>
+    <module>uberfire-widgets-user-management-bridges-properties-file</module>
   </modules>
 
 </project>
