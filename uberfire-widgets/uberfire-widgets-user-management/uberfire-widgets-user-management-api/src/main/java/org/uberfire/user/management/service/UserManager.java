@@ -23,6 +23,12 @@ import java.util.Set;
  */
 public interface UserManager {
 
+    boolean isAddUserSupported();
+
+    boolean isUpdateUserSupported();
+
+    boolean isDeleteUserSupported();
+
     Set<String> getUserNames();
 
     Set<String> getUserRoles( final String userName );

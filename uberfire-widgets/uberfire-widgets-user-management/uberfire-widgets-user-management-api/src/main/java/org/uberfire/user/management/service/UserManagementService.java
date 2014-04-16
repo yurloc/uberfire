@@ -15,18 +15,17 @@
  */
 package org.uberfire.user.management.service;
 
-import java.util.List;
-
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.uberfire.user.management.model.UserInformation;
 import org.uberfire.user.management.model.UserInformationWithPassword;
+import org.uberfire.user.management.model.UserManagerContent;
 
 @Remote
 public interface UserManagementService {
 
     boolean isUserManagerInstalled();
 
-    List<UserInformation> getUsers();
+    UserManagerContent loadContent();
 
     void addUser( final UserInformationWithPassword userInformation );
 

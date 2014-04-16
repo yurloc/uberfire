@@ -15,16 +15,14 @@
  */
 package org.uberfire.user.management.client;
 
-import java.util.List;
-
 import org.uberfire.client.mvp.UberView;
-import org.uberfire.user.management.model.UserInformation;
+import org.uberfire.user.management.model.UserManagerContent;
 
 public interface UserManagementView extends UberView<UserManagementPresenter> {
 
-    void setUserManagerAvailable( final boolean isUserManagerAvailable );
+    void setUserManagerInstalled( final boolean isUserManagerInstalled );
 
-    void setContent( final List<UserInformation> userInformation,
+    void setContent( final UserManagerContent content,
                      final boolean isReadOnly );
 
 }

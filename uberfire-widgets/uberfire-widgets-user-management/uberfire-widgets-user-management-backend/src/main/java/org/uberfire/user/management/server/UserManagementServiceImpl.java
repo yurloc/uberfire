@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uberfire.user.management.model.UserInformation;
 import org.uberfire.user.management.model.UserInformationWithPassword;
+import org.uberfire.user.management.model.UserManagerCapabilities;
+import org.uberfire.user.management.model.UserManagerContent;
 import org.uberfire.user.management.service.UserManagementService;
 import org.uberfire.user.management.service.UserManager;
 
@@ -62,7 +64,23 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public List<UserInformation> getUsers() {
+    public UserManagerContent loadContent() {
+        return new UserManagerContent( loadUserInformation(),
+                                       loadUserManagerCapabilities() );
+    }
+
+    private UserManagerCapabilities loadUserManagerCapabilities() {
+        if ( userManager == null ) {
+            return new UserManagerCapabilities( false,
+                                                false,
+                                                false );
+        }
+        return new UserManagerCapabilities( userManager.isAddUserSupported(),
+                                            userManager.isUpdateUserSupported(),
+                                            userManager.isDeleteUserSupported() );
+    }
+
+    public List<UserInformation> loadUserInformation() {
         if ( userManager == null ) {
             throw new IllegalStateException( "UserManager has not been installed." );
         }

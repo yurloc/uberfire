@@ -15,7 +15,6 @@
  */
 package org.uberfire.user.management.client;
 
-import java.util.List;
 import javax.annotation.PostConstruct;
 
 import com.github.gwtbootstrap.client.ui.Button;
@@ -43,6 +42,7 @@ import org.uberfire.commons.validation.PortablePreconditions;
 import org.uberfire.user.management.client.resources.i18n.UserManagementConstants;
 import org.uberfire.user.management.client.utils.UserManagementUtils;
 import org.uberfire.user.management.model.UserInformation;
+import org.uberfire.user.management.model.UserManagerContent;
 
 public class UserManagerWidget extends Composite implements UberView<UserManagementPresenter> {
 
@@ -156,13 +156,16 @@ public class UserManagerWidget extends Composite implements UberView<UserManagem
                                                              presenter );
     }
 
-    public void setContent( final List<UserInformation> userInformation,
+    public void setContent( final UserManagerContent content,
                             final boolean isReadOnly ) {
         this.isReadOnly = isReadOnly;
-        this.table.setRowData( userInformation );
-        addUserButton.setEnabled( !isReadOnly );
-        editUserButton.setEnabled( !isReadOnly );
-        deleteUserButton.setEnabled( !isReadOnly );
+        this.table.setRowData( content.getUserInformation() );
+        final boolean isAddUserSupported = content.getCapabilities().isAddUserSupported();
+        final boolean isUpdateUserSupported = content.getCapabilities().isUpdateUserSupported();
+        final boolean isDeleteUserSupported = content.getCapabilities().isDeleteUserSupported();
+        addUserButton.setEnabled( !isReadOnly && isAddUserSupported );
+        editUserButton.setEnabled( !isReadOnly && isUpdateUserSupported );
+        deleteUserButton.setEnabled( !isReadOnly && isDeleteUserSupported );
     }
 
     @UiHandler(value = "addUserButton")

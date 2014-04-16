@@ -33,6 +33,21 @@ public class DebugUserManager implements UserManager {
     }};
 
     @Override
+    public boolean isAddUserSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean isUpdateUserSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean isDeleteUserSupported() {
+        return true;
+    }
+
+    @Override
     public Set<String> getUserNames() {
         return users.keySet();
     }

@@ -15,7 +15,6 @@
  */
 package org.uberfire.user.management.client;
 
-import java.util.List;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Command;
@@ -36,6 +35,7 @@ import org.uberfire.user.management.client.resources.i18n.UserManagementConstant
 import org.uberfire.user.management.client.utils.UserManagementUtils;
 import org.uberfire.user.management.model.UserInformation;
 import org.uberfire.user.management.model.UserInformationWithPassword;
+import org.uberfire.user.management.model.UserManagerContent;
 import org.uberfire.user.management.service.UserManagementService;
 
 @WorkbenchScreen(identifier = "UserManagementPresenter")
@@ -64,20 +64,17 @@ public class UserManagementPresenter {
         userManagementService.call( new RemoteCallback<Boolean>() {
             @Override
             public void callback( final Boolean result ) {
-                final boolean isUserManagerAvailable = Boolean.TRUE.equals( result );
-                view.setUserManagerAvailable( isUserManagerAvailable );
-                if ( isUserManagerAvailable ) {
-                    init();
-                }
+                final boolean isUserManagerInstalled = Boolean.TRUE.equals( result );
+                view.setUserManagerInstalled( isUserManagerInstalled );
             }
         } ).isUserManagerInstalled();
     }
 
-    private void init() {
-        userManagementService.call( new RemoteCallback<List<UserInformation>>() {
+    public void loadContent() {
+        userManagementService.call( new RemoteCallback<UserManagerContent>() {
                                         @Override
-                                        public void callback( final List<UserInformation> userInformation ) {
-                                            view.setContent( userInformation,
+                                        public void callback( final UserManagerContent content ) {
+                                            view.setContent( content,
                                                              isReadOnly );
                                         }
                                     },
@@ -90,7 +87,7 @@ public class UserManagementPresenter {
                                             return false;
                                         }
                                     }
-                                  ).getUsers();
+                                  ).loadContent();
     }
 
     @WorkbenchPartTitle
@@ -135,11 +132,10 @@ public class UserManagementPresenter {
     }
 
     public void deleteUser( final UserInformation userInformation ) {
-        userManagementService.call( new RemoteCallback<List<UserInformation>>() {
+        userManagementService.call( new RemoteCallback<Void>() {
                                         @Override
-                                        public void callback( final List<UserInformation> userInformation ) {
-                                            view.setContent( userInformation,
-                                                             isReadOnly );
+                                        public void callback( final Void o ) {
+                                            //Do nothing
                                         }
                                     },
                                     new ErrorCallback<Message>() {

@@ -27,7 +27,10 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.uberfire.commons.validation.PortablePreconditions;
 import org.uberfire.user.management.model.UserInformation;
+import org.uberfire.user.management.model.UserManagerCapabilities;
+import org.uberfire.user.management.model.UserManagerContent;
 
 public class UserManagementViewImpl extends Composite implements RequiresResize,
                                                                  UserManagementView {
@@ -38,6 +41,8 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
 
     }
 
+    private static UserManagementViewImplBinder uiBinder = GWT.create( UserManagementViewImplBinder.class );
+
     @Inject
     private UserManagerWidget userManagerWidget;
 
@@ -47,7 +52,8 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
     @UiField
     SimplePanel container;
 
-    private static UserManagementViewImplBinder uiBinder = GWT.create( UserManagementViewImplBinder.class );
+
+    private UserManagementPresenter presenter;
 
     @PostConstruct
     public void init() {
@@ -55,10 +61,12 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
     }
 
     @Override
-    public void setUserManagerAvailable( final boolean isUserManagerAvailable ) {
+    public void setUserManagerInstalled( final boolean isUserManagerInstalled ) {
         container.clear();
-        if ( isUserManagerAvailable ) {
+        if ( isUserManagerInstalled ) {
             container.setWidget( userManagerWidget );
+            presenter.loadContent();
+
         } else {
             container.setWidget( noUserManagerInstalledWidget );
             onResize();
@@ -68,12 +76,14 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
     @Override
     public void init( final UserManagementPresenter presenter ) {
         userManagerWidget.init( presenter );
+        this.presenter = PortablePreconditions.checkNotNull( "presenter",
+                                                             presenter );
     }
 
     @Override
-    public void setContent( final List<UserInformation> userInformation,
+    public void setContent( final UserManagerContent content,
                             final boolean isReadOnly ) {
-        userManagerWidget.setContent( userInformation,
+        userManagerWidget.setContent( content,
                                       isReadOnly );
     }
 
