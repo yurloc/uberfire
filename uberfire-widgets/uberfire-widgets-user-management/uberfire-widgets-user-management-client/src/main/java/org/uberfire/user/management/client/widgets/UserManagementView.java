@@ -13,26 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.uberfire.user.management.service;
+package org.uberfire.user.management.client.widgets;
 
-import org.jboss.errai.bus.server.annotations.Remote;
+import org.uberfire.client.mvp.UberView;
+import org.uberfire.user.management.client.UserManagementPresenter;
 import org.uberfire.user.management.model.UserInformation;
 import org.uberfire.user.management.model.UserManagerContent;
 
-@Remote
-public interface UserManagementService {
+public interface UserManagementView extends UberView<UserManagementPresenter> {
 
-    boolean isUserManagerInstalled();
+    void setContent( final UserManagerContent content,
+                     final boolean isReadOnly );
 
-    UserManagerContent loadContent();
+    void addUser( final UserInformation userInformation );
 
-    void addUser( final UserInformation userInformation,
-                  final String userPassword );
-
-    void updateUser( final UserInformation userInformation );
-
-    void updateUser( final UserInformation userInformation,
-                     final String userPassword );
+    void updateUser( final UserInformation oldUserInformation,
+                     final UserInformation newUserInformation );
 
     void deleteUser( final UserInformation userInformation );
 

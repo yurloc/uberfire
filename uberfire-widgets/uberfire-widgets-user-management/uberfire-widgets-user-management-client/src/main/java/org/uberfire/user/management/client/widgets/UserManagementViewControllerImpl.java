@@ -13,9 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.uberfire.user.management.client;
+package org.uberfire.user.management.client.widgets;
 
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -28,23 +27,23 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.uberfire.commons.validation.PortablePreconditions;
+import org.uberfire.user.management.client.UserManagementPresenter;
 import org.uberfire.user.management.model.UserInformation;
-import org.uberfire.user.management.model.UserManagerCapabilities;
 import org.uberfire.user.management.model.UserManagerContent;
 
-public class UserManagementViewImpl extends Composite implements RequiresResize,
-                                                                 UserManagementView {
+public class UserManagementViewControllerImpl extends Composite implements RequiresResize,
+                                                                           UserManagementViewController {
 
     interface UserManagementViewImplBinder
             extends
-            UiBinder<Widget, UserManagementViewImpl> {
+            UiBinder<Widget, UserManagementViewControllerImpl> {
 
     }
 
     private static UserManagementViewImplBinder uiBinder = GWT.create( UserManagementViewImplBinder.class );
 
     @Inject
-    private UserManagerWidget userManagerWidget;
+    private UserManagerViewImpl userManagerView;
 
     @Inject
     private NoUserManagerInstalledWidget noUserManagerInstalledWidget;
@@ -52,8 +51,9 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
     @UiField
     SimplePanel container;
 
-
     private UserManagementPresenter presenter;
+
+    private boolean isUserManagerInstalled;
 
     @PostConstruct
     public void init() {
@@ -63,8 +63,9 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
     @Override
     public void setUserManagerInstalled( final boolean isUserManagerInstalled ) {
         container.clear();
+        this.isUserManagerInstalled = isUserManagerInstalled;
         if ( isUserManagerInstalled ) {
-            container.setWidget( userManagerWidget );
+            container.setWidget( userManagerView );
             presenter.loadContent();
 
         } else {
@@ -75,7 +76,7 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
 
     @Override
     public void init( final UserManagementPresenter presenter ) {
-        userManagerWidget.init( presenter );
+        userManagerView.init( presenter );
         this.presenter = PortablePreconditions.checkNotNull( "presenter",
                                                              presenter );
     }
@@ -83,8 +84,41 @@ public class UserManagementViewImpl extends Composite implements RequiresResize,
     @Override
     public void setContent( final UserManagerContent content,
                             final boolean isReadOnly ) {
-        userManagerWidget.setContent( content,
-                                      isReadOnly );
+        //If no UserManager has been installed it's pointless updating the User Manager View
+        if ( !isUserManagerInstalled ) {
+            return;
+        }
+        userManagerView.setContent( content,
+                                    isReadOnly );
+    }
+
+    @Override
+    public void addUser( final UserInformation userInformation ) {
+        //If no UserManager has been installed it's pointless updating the User Manager View
+        if ( !isUserManagerInstalled ) {
+            return;
+        }
+        userManagerView.addUser( userInformation );
+    }
+
+    @Override
+    public void updateUser( final UserInformation oldUserInformation,
+                            final UserInformation newUserInformation ) {
+        //If no UserManager has been installed it's pointless updating the User Manager View
+        if ( !isUserManagerInstalled ) {
+            return;
+        }
+        userManagerView.updateUser( oldUserInformation,
+                                    newUserInformation );
+    }
+
+    @Override
+    public void deleteUser( final UserInformation userInformation ) {
+        //If no UserManager has been installed it's pointless updating the User Manager View
+        if ( !isUserManagerInstalled ) {
+            return;
+        }
+        userManagerView.deleteUser( userInformation );
     }
 
     @Override

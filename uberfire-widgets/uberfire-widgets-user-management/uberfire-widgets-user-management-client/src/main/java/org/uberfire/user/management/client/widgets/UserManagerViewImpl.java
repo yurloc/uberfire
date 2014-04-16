@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.uberfire.user.management.client;
+package org.uberfire.user.management.client.widgets;
 
 import javax.annotation.PostConstruct;
 
@@ -35,25 +35,27 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import org.uberfire.client.common.ButtonCell;
-import org.uberfire.client.mvp.UberView;
 import org.uberfire.client.tables.ResizableHeader;
 import org.uberfire.commons.validation.PortablePreconditions;
+import org.uberfire.user.management.client.UserManagementPresenter;
 import org.uberfire.user.management.client.resources.i18n.UserManagementConstants;
 import org.uberfire.user.management.client.utils.UserManagementUtils;
 import org.uberfire.user.management.model.UserInformation;
 import org.uberfire.user.management.model.UserManagerContent;
 
-public class UserManagerWidget extends Composite implements UberView<UserManagementPresenter> {
+public class UserManagerViewImpl extends Composite implements UserManagementView {
 
     interface UserManagerWidgetBinder
             extends
-            UiBinder<Widget, UserManagerWidget> {
+            UiBinder<Widget, UserManagerViewImpl> {
 
     }
 
     @UiField(provided = true)
     CellTable<UserInformation> table = new CellTable<UserInformation>();
+    ListDataProvider<UserInformation> dataProvider;
 
     @UiField
     FluidContainer container;
@@ -156,16 +158,39 @@ public class UserManagerWidget extends Composite implements UberView<UserManagem
                                                              presenter );
     }
 
+    @Override
     public void setContent( final UserManagerContent content,
                             final boolean isReadOnly ) {
         this.isReadOnly = isReadOnly;
-        this.table.setRowData( content.getUserInformation() );
+        this.dataProvider = new ListDataProvider<UserInformation>( content.getUserInformation() );
+        this.dataProvider.addDataDisplay( table );
         final boolean isAddUserSupported = content.getCapabilities().isAddUserSupported();
         final boolean isUpdateUserSupported = content.getCapabilities().isUpdateUserSupported();
         final boolean isDeleteUserSupported = content.getCapabilities().isDeleteUserSupported();
         addUserButton.setEnabled( !isReadOnly && isAddUserSupported );
         editUserButton.setEnabled( !isReadOnly && isUpdateUserSupported );
         deleteUserButton.setEnabled( !isReadOnly && isDeleteUserSupported );
+    }
+
+    @Override
+    public void addUser( final UserInformation userInformation ) {
+        this.dataProvider.getList().add( userInformation );
+    }
+
+    @Override
+    public void updateUser( final UserInformation oldUserInformation,
+                            final UserInformation newUserInformation ) {
+        final int idx = this.dataProvider.getList().indexOf( oldUserInformation );
+        if ( idx < 0 ) {
+            return;
+        }
+        this.dataProvider.getList().set( idx,
+                                         newUserInformation );
+    }
+
+    @Override
+    public void deleteUser( final UserInformation userInformation ) {
+        this.dataProvider.getList().remove( userInformation );
     }
 
     @UiHandler(value = "addUserButton")

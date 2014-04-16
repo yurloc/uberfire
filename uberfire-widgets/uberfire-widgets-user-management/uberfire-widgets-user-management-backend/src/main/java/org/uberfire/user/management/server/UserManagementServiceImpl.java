@@ -27,7 +27,6 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uberfire.user.management.model.UserInformation;
-import org.uberfire.user.management.model.UserInformationWithPassword;
 import org.uberfire.user.management.model.UserManagerCapabilities;
 import org.uberfire.user.management.model.UserManagerContent;
 import org.uberfire.user.management.service.UserManagementService;
@@ -98,12 +97,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public void addUser( final UserInformationWithPassword userInformation ) {
+    public void addUser( final UserInformation userInformation,
+                         final String userPassword ) {
         if ( userManager == null ) {
             throw new IllegalStateException( "UserManager has not been installed." );
         }
         final String userName = userInformation.getUserName();
-        final String userPassword = userInformation.getUserPassword();
         final Set<String> userRoles = userInformation.getUserRoles();
 
         logger.info( "Adding user '" + userName + "' using '" + userManager.getClass().getName() + "'." );
@@ -128,12 +127,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public void updateUser( final UserInformationWithPassword userInformation ) {
+    public void updateUser( final UserInformation userInformation,
+                            final String userPassword ) {
         if ( userManager == null ) {
             throw new IllegalStateException( "UserManager has not been installed." );
         }
         final String userName = userInformation.getUserName();
-        final String userPassword = userInformation.getUserPassword();
         final Set<String> userRoles = userInformation.getUserRoles();
 
         logger.info( "Updating user '" + userName + "' using '" + userManager.getClass().getName() + "'." );

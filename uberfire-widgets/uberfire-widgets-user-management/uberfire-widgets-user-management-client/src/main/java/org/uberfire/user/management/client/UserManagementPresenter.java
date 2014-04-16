@@ -15,6 +15,7 @@
  */
 package org.uberfire.user.management.client;
 
+import java.util.Set;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Command;
@@ -33,8 +34,8 @@ import org.uberfire.user.management.client.popups.AddUserPopup;
 import org.uberfire.user.management.client.popups.EditUserPopup;
 import org.uberfire.user.management.client.resources.i18n.UserManagementConstants;
 import org.uberfire.user.management.client.utils.UserManagementUtils;
+import org.uberfire.user.management.client.widgets.UserManagementViewController;
 import org.uberfire.user.management.model.UserInformation;
-import org.uberfire.user.management.model.UserInformationWithPassword;
 import org.uberfire.user.management.model.UserManagerContent;
 import org.uberfire.user.management.service.UserManagementService;
 
@@ -42,7 +43,7 @@ import org.uberfire.user.management.service.UserManagementService;
 public class UserManagementPresenter {
 
     @Inject
-    private UserManagementView view;
+    private UserManagementViewController view;
 
     @Inject
     private AddUserPopup addUserPopup;
@@ -107,11 +108,13 @@ public class UserManagementPresenter {
             public void execute() {
                 final String userName = addUserPopup.getUserName();
                 final String userPassword = addUserPopup.getUserPassword();
-                final String userRoles = addUserPopup.getUserRoles();
+                final Set<String> userRoles = UserManagementUtils.convertUserRoles( addUserPopup.getUserRoles() );
+                final UserInformation userInformation = new UserInformation( userName,
+                                                                             userRoles );
                 userManagementService.call( new RemoteCallback<Void>() {
                                                 @Override
                                                 public void callback( final Void o ) {
-                                                    //Do nothing
+                                                    view.addUser( userInformation );
                                                 }
                                             },
                                             new ErrorCallback<Message>() {
@@ -123,9 +126,8 @@ public class UserManagementPresenter {
                                                     return false;
                                                 }
                                             }
-                                          ).addUser( new UserInformationWithPassword( userName,
-                                                                                      userPassword,
-                                                                                      UserManagementUtils.convertUserRoles( userRoles ) ) );
+                                          ).addUser( userInformation,
+                                                     userPassword );
             }
         } );
         addUserPopup.show();
@@ -135,7 +137,7 @@ public class UserManagementPresenter {
         userManagementService.call( new RemoteCallback<Void>() {
                                         @Override
                                         public void callback( final Void o ) {
-                                            //Do nothing
+                                            view.deleteUser( userInformation );
                                         }
                                     },
                                     new ErrorCallback<Message>() {
@@ -150,32 +152,35 @@ public class UserManagementPresenter {
                                   ).deleteUser( userInformation );
     }
 
-    public void editUser( final UserInformation userInformation ) {
+    public void editUser( final UserInformation oldUserInformation ) {
         editUserPopup.setCallbackCommand( new Command() {
 
             @Override
             public void execute() {
-                final String userName = userInformation.getUserName();
+                final String userName = oldUserInformation.getUserName();
                 final String userPassword = editUserPopup.getUserPassword();
                 final boolean isUserPasswordChanged = editUserPopup.isPasswordChanged();
-                final String userRoles = editUserPopup.getUserRoles();
+                final Set<String> userRoles = UserManagementUtils.convertUserRoles( editUserPopup.getUserRoles() );
 
+                final UserInformation newUserInformation = new UserInformation( userName,
+                                                                                userRoles );
                 if ( isUserPasswordChanged ) {
-                    updateUser( userName,
-                                userPassword,
-                                userRoles );
+                    updateUser( oldUserInformation,
+                                newUserInformation,
+                                userPassword );
                 } else {
-                    updateUser( userName,
-                                userRoles );
+                    updateUser( oldUserInformation,
+                                newUserInformation );
                 }
             }
 
-            private void updateUser( final String userName,
-                                     final String userRoles ) {
+            private void updateUser( final UserInformation oldUserInformation,
+                                     final UserInformation newUserInformation ) {
                 userManagementService.call( new RemoteCallback<Void>() {
                                                 @Override
                                                 public void callback( final Void o ) {
-                                                    //Do nothing
+                                                    view.updateUser( oldUserInformation,
+                                                                     newUserInformation );
                                                 }
                                             },
                                             new ErrorCallback<Message>() {
@@ -187,17 +192,17 @@ public class UserManagementPresenter {
                                                     return false;
                                                 }
                                             }
-                                          ).updateUser( new UserInformation( userName,
-                                                                             UserManagementUtils.convertUserRoles( userRoles ) ) );
+                                          ).updateUser( newUserInformation );
             }
 
-            private void updateUser( final String userName,
-                                     final String userPassword,
-                                     final String userRoles ) {
+            private void updateUser( final UserInformation oldUserInformation,
+                                     final UserInformation newUserInformation,
+                                     final String userPassword ) {
                 userManagementService.call( new RemoteCallback<Void>() {
                                                 @Override
                                                 public void callback( final Void o ) {
-                                                    //Do nothing
+                                                    view.updateUser( oldUserInformation,
+                                                                     newUserInformation );
                                                 }
                                             },
                                             new ErrorCallback<Message>() {
@@ -209,13 +214,12 @@ public class UserManagementPresenter {
                                                     return false;
                                                 }
                                             }
-                                          ).updateUser( new UserInformationWithPassword( userName,
-                                                                                         userPassword,
-                                                                                         UserManagementUtils.convertUserRoles( userRoles ) ) );
+                                          ).updateUser( newUserInformation,
+                                                        userPassword );
             }
 
         } );
-        editUserPopup.setUserInformation( userInformation );
+        editUserPopup.setUserInformation( oldUserInformation );
         editUserPopup.show();
 
     }

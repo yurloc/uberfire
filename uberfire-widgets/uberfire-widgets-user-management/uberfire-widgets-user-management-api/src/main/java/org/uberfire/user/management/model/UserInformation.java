@@ -46,4 +46,39 @@ public class UserInformation {
         return userRoles;
     }
 
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() ) {
+            return false;
+        }
+
+        UserInformation that = (UserInformation) o;
+
+        if ( !userName.equals( that.userName ) ) {
+            return false;
+        }
+        if ( !userRoles.equals( that.userRoles ) ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userName.hashCode();
+        result = 31 * result + userRoles.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "UserInformation{" +
+                "userName='" + userName + "\'" +
+                ", userRoles=" + userRoles +
+                '}';
+    }
 }

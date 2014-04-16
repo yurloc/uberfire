@@ -13,16 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.uberfire.user.management.client;
+package org.uberfire.user.management.client.widgets;
 
-import org.uberfire.client.mvp.UberView;
-import org.uberfire.user.management.model.UserManagerContent;
-
-public interface UserManagementView extends UberView<UserManagementPresenter> {
+public interface UserManagementViewController extends UserManagementView {
 
     void setUserManagerInstalled( final boolean isUserManagerInstalled );
-
-    void setContent( final UserManagerContent content,
-                     final boolean isReadOnly );
 
 }
