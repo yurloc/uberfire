@@ -42,17 +42,17 @@ public class PropertiesFileUserManager implements UserManager {
 
     @Override
     public boolean isAddUserSupported() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isUpdateUserSupported() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isDeleteUserSupported() {
-        return false;
+        return true;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class PropertiesFileUserManager implements UserManager {
         properties.setProperty( userName,
                                 makePropertiesFileValue( userPassword,
                                                          userRoles ) );
-
+        saveProperties();
     }
 
     @Override
@@ -134,6 +134,7 @@ public class PropertiesFileUserManager implements UserManager {
         properties.setProperty( userName,
                                 makePropertiesFileValue( userPassword,
                                                          userRoles ) );
+        saveProperties();
     }
 
     @Override
@@ -154,6 +155,7 @@ public class PropertiesFileUserManager implements UserManager {
         properties.setProperty( userName,
                                 makePropertiesFileValue( userPassword,
                                                          userRoles ) );
+        saveProperties();
     }
 
     @Override
@@ -176,6 +178,7 @@ public class PropertiesFileUserManager implements UserManager {
         properties.setProperty( userName,
                                 makePropertiesFileValue( userPassword,
                                                          userRoles ) );
+        saveProperties();
     }
 
     @Override
@@ -198,6 +201,7 @@ public class PropertiesFileUserManager implements UserManager {
         properties.setProperty( userName,
                                 makePropertiesFileValue( userPassword,
                                                          userRoles ) );
+        saveProperties();
     }
 
     @Override
@@ -209,6 +213,7 @@ public class PropertiesFileUserManager implements UserManager {
         logger.info( "Deleting User: '" + userName + "'." );
 
         properties.remove( userName );
+        saveProperties();
     }
 
     private Properties loadProperties() {
