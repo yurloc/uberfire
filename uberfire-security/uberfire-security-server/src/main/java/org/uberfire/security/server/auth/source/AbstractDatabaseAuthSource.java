@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,12 +44,14 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
     private static final Logger LOG = LoggerFactory.getLogger( AbstractDatabaseAuthSource.class );
 
     private boolean alreadyInit = false;
+    private Map<String, ?> options = new HashMap<String, Object>();
     private String userQuery;
     private String rolesQuery;
 
     public abstract Connection getConnection();
 
     public synchronized void initialize( final Map<String, ?> options ) {
+        this.options = options;
         if ( !alreadyInit ) {
             userQuery = "select 1 from " + options.get( "userTable" ) + " where " + options.get( "userField" ) + "=? and " + options.get( "passwordField" ) + "=?";
 
@@ -71,6 +74,11 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
     }
 
     @Override
+    public Map<String, ?> getOptions() {
+        return this.options;
+    }
+
+    @Override
     public boolean supportsCredential( final Credential credential ) {
         if ( credential == null ) {
             return false;
@@ -79,7 +87,8 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
     }
 
     @Override
-    public boolean authenticate( final Credential credential, final SecurityContext securityContext ) {
+    public boolean authenticate( final Credential credential,
+                                 final SecurityContext securityContext ) {
         final UsernamePasswordCredential usernamePasswd = checkInstanceOf( "credential", credential, UsernamePasswordCredential.class );
 
         Connection connection = null;

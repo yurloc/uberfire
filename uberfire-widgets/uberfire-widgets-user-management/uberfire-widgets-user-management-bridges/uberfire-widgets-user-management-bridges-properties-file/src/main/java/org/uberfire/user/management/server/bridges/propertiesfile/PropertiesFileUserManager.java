@@ -22,13 +22,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uberfire.commons.validation.PortablePreconditions;
+import org.uberfire.security.auth.AuthenticationSource;
+import org.uberfire.security.server.auth.source.PropertyUserSource;
+import org.uberfire.security.server.cdi.AppAuthenticationStores;
 import org.uberfire.user.management.service.UserManager;
 
 @ApplicationScoped
@@ -36,23 +42,45 @@ public class PropertiesFileUserManager implements UserManager {
 
     private static final Logger logger = LoggerFactory.getLogger( PropertiesFileUserManager.class );
 
-    private static final String PROPERTIES_FILE = "org.uberfire.user.management.server.bridges.propertiesfile";
+    @Inject
+    @AppAuthenticationStores
+    private List<AuthenticationSource> authenticationSources;
+
+    private PropertyUserSource propertyUserSource;
+    private String propertyUserSourcePath = null;
 
     private Properties properties = null;
 
+    @PostConstruct
+    private void initialise() {
+        for ( AuthenticationSource authenticationSource : authenticationSources ) {
+            if ( authenticationSource instanceof PropertyUserSource ) {
+                propertyUserSource = (PropertyUserSource) authenticationSource;
+                propertyUserSourcePath = (String) propertyUserSource.getOptions().get( "usersPropertyFile" );
+                break;
+            }
+        }
+        if ( propertyUserSource == null ) {
+            logger.info( "org.uberfire.security.server.auth.source.PropertyUserSource not specified in META-INF/services/org.uberfire.security.auth.AuthenticationSource. User Management will be disabled." );
+        }
+        if ( propertyUserSourcePath == null ) {
+            logger.info( "org.uberfire.security.server.UberFireSecurityFilter's usersPropertyFile init parameter has not been set. User Management will be disabled." );
+        }
+    }
+
     @Override
     public boolean isAddUserSupported() {
-        return true;
+        return !( propertyUserSourcePath == null || propertyUserSource == null );
     }
 
     @Override
     public boolean isUpdateUserSupported() {
-        return true;
+        return !( propertyUserSourcePath == null || propertyUserSource == null );
     }
 
     @Override
     public boolean isDeleteUserSupported() {
-        return true;
+        return !( propertyUserSourcePath == null || propertyUserSource == null );
     }
 
     @Override
@@ -219,18 +247,17 @@ public class PropertiesFileUserManager implements UserManager {
     private Properties loadProperties() {
         InputStream is = null;
         try {
-            final String userPropertiesPath = System.getProperty( "org.uberfire.user.management.server.bridges.propertiesfile" );
-            if ( userPropertiesPath == null ) {
-                throw new RuntimeException( "System Property '" + PROPERTIES_FILE + "' should be set to the path of the properties file containing User information." );
+            if ( propertyUserSourcePath == null ) {
+                throw new RuntimeException( "org.uberfire.security.server.UberFireSecurityFilter's usersPropertyFile init parameter has not been set." );
             }
 
-            is = new FileInputStream( userPropertiesPath );
+            is = new FileInputStream( propertyUserSourcePath );
 
             if ( is == null ) {
                 throw new RuntimeException( "Unable to find properties file." );
             }
 
-            logger.info( "Loading User information from '" + userPropertiesPath + "'." );
+            logger.info( "Loading User information from '" + propertyUserSourcePath + "'." );
 
             final Properties properties = new Properties();
             properties.load( is );
@@ -257,20 +284,20 @@ public class PropertiesFileUserManager implements UserManager {
     private void saveProperties() {
         OutputStream os = null;
         try {
-            final String userPropertiesPath = System.getProperty( "org.uberfire.user.management.server.bridges.propertiesfile" );
-            if ( userPropertiesPath == null ) {
-                throw new RuntimeException( "System Property '" + PROPERTIES_FILE + "' should be set to the path of the properties file containing User information." );
+            if ( propertyUserSourcePath == null ) {
+                throw new RuntimeException( "org.uberfire.security.server.UberFireSecurityFilter's usersPropertyFile init parameter has not been set." );
             }
 
-            os = new FileOutputStream( userPropertiesPath );
+            os = new FileOutputStream( propertyUserSourcePath );
 
             if ( os == null ) {
                 throw new RuntimeException( "Unable to find properties file." );
             }
 
-            logger.info( "Saving User information to '" + userPropertiesPath + "'." );
+            logger.info( "Saving User information to '" + propertyUserSourcePath + "'." );
 
-            properties.store( os, "" );
+            properties.store( os,
+                              "" );
 
         } catch ( FileNotFoundException e ) {
             logger.error( e.getMessage(),

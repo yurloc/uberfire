@@ -16,6 +16,10 @@
       <param-name>org.uberfire.cookie.id</param-name>
       <param-value>uf.showcase</param-value>
     </init-param>
+    <init-param>
+      <param-name>usersPropertyFile</param-name>
+      <param-value>/home/manstis/Desktop/users.properties</param-value>
+    </init-param>
   </filter>
 
   <filter-mapping>

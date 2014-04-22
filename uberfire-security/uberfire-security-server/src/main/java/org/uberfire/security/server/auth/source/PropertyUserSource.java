@@ -42,55 +42,63 @@ import static org.uberfire.commons.validation.Preconditions.*;
 public class PropertyUserSource implements AuthenticationSource,
                                            RoleProvider {
 
-    private boolean alreadyInit = false;
+    private Map<String, ?> options = new HashMap<String, Object>();
     private Map<String, Object> credentials = new HashMap<String, Object>();
     private Map<String, List<Role>> roles = new HashMap<String, List<Role>>();
 
     @Override
-    public synchronized void initialize( Map<String, ?> options ) {
-        if ( !alreadyInit ) {
-            InputStream is = null;
-            try {
-                if ( options.containsKey( "usersPropertyFile" ) ) {
-                    is = new FileInputStream( new File( (String) options.get( "usersPropertyFile" ) ) );
-                } else {
-                    is = Thread.currentThread().getContextClassLoader().getResourceAsStream( SecurityConstants.CONFIG_USERS_PROPERTIES );
-                }
+    public synchronized void initialize( final Map<String, ?> options ) {
+        this.options = options;
+    }
 
-                if ( is == null ) {
-                    throw new RuntimeException( "Uname to find properties file." );
-                }
-                final Properties properties = new Properties();
-                properties.load( is );
+    private void loadProperties() {
+        InputStream is = null;
+        credentials.clear();
+        roles.clear();
+        try {
+            if ( options.containsKey( "usersPropertyFile" ) ) {
+                is = new FileInputStream( new File( (String) options.get( "usersPropertyFile" ) ) );
+            } else {
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream( SecurityConstants.CONFIG_USERS_PROPERTIES );
+            }
 
-                for ( Map.Entry<Object, Object> contentEntry : properties.entrySet() ) {
-                    final String content = contentEntry.getValue().toString();
-                    final String[] result = content.split( "," );
-                    credentials.put( contentEntry.getKey().toString(), result[ 0 ] );
-                    final List<Role> roles = new ArrayList<Role>();
-                    if ( result.length > 1 ) {
-                        for ( int i = 1; i < result.length; i++ ) {
-                            final String currentRole = result[ i ];
-                            roles.add( new RoleImpl( currentRole ) );
-                        }
-                        this.roles.put( contentEntry.getKey().toString(), roles );
+            if ( is == null ) {
+                throw new RuntimeException( "Unable to find properties file." );
+            }
+            final Properties properties = new Properties();
+            properties.load( is );
+
+            for ( Map.Entry<Object, Object> contentEntry : properties.entrySet() ) {
+                final String content = contentEntry.getValue().toString();
+                final String[] result = content.split( "," );
+                credentials.put( contentEntry.getKey().toString(), result[ 0 ] );
+                final List<Role> roles = new ArrayList<Role>();
+                if ( result.length > 1 ) {
+                    for ( int i = 1; i < result.length; i++ ) {
+                        final String currentRole = result[ i ];
+                        roles.add( new RoleImpl( currentRole ) );
                     }
+                    this.roles.put( contentEntry.getKey().toString(), roles );
                 }
+            }
 
-            } catch ( FileNotFoundException e ) {
-                throw new RuntimeException( e );
-            } catch ( IOException e ) {
-                throw new RuntimeException( e );
-            } finally {
-                alreadyInit = true;
-                if ( is != null ) {
-                    try {
-                        is.close();
-                    } catch ( Exception e ) {
-                    }
+        } catch ( FileNotFoundException e ) {
+            throw new RuntimeException( e );
+        } catch ( IOException e ) {
+            throw new RuntimeException( e );
+        } finally {
+            if ( is != null ) {
+                try {
+                    is.close();
+                } catch ( Exception e ) {
                 }
             }
         }
+    }
+
+    @Override
+    public Map<String, ?> getOptions() {
+        return options;
     }
 
     @Override
@@ -102,9 +110,13 @@ public class PropertyUserSource implements AuthenticationSource,
     }
 
     @Override
-    public boolean authenticate( final Credential credential, final SecurityContext securityContext ) {
-        final UsernamePasswordCredential usernamePasswd = checkInstanceOf( "credential", credential, UsernamePasswordCredential.class );
+    public synchronized boolean authenticate( final Credential credential,
+                                              final SecurityContext securityContext ) {
+        final UsernamePasswordCredential usernamePasswd = checkInstanceOf( "credential",
+                                                                           credential,
+                                                                           UsernamePasswordCredential.class );
 
+        loadProperties();
         final Object pass = credentials.get( usernamePasswd.getUserName() );
         if ( pass != null && pass.equals( usernamePasswd.getPassword() ) ) {
             return true;
@@ -113,7 +125,11 @@ public class PropertyUserSource implements AuthenticationSource,
     }
 
     @Override
-    public List<Role> loadRoles( final Principal principal ) {
+    public synchronized List<Role> loadRoles( final Principal principal ) {
+        checkNotNull( "principle",
+                      principal );
+        loadProperties();
         return roles.get( principal.getName() );
     }
+
 }

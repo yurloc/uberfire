@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,16 +36,24 @@ public class JAASAuthenticationSource implements AuthenticationSource,
     private String rolePrincipleName = DEFAULT_ROLE_PRINCIPLE_NAME;
     private final ThreadLocal<Subject> subjects = new ThreadLocal<Subject>();
 
+    private Map<String, ?> options = new HashMap<String, Object>();
+
     private String domain = "ApplicationRealm";
 
     @Override
     public void initialize( Map<String, ?> options ) {
+        this.options = options;
         if ( options.containsKey( AUTH_DOMAIN_KEY ) ) {
             domain = (String) options.get( AUTH_DOMAIN_KEY );
         }
         if ( options.containsKey( ROLES_IN_CONTEXT_KEY ) ) {
             rolePrincipleName = (String) options.get( ROLES_IN_CONTEXT_KEY );
         }
+    }
+
+    @Override
+    public Map<String, ?> getOptions() {
+        return this.options;
     }
 
     @Override
