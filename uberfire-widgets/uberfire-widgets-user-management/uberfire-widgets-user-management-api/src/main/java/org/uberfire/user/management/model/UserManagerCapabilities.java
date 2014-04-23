@@ -21,30 +21,38 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 public class UserManagerCapabilities {
 
     private boolean isAddUserSupported;
-    private boolean isUpdateUserSupported;
-    private boolean isDeleteUsersupported;
+    private boolean isUpdateUserPasswordSupported;
+    private boolean isUpdateUserRolesSupported;
+    private boolean isDeleteUserSupported;
 
     public UserManagerCapabilities() {
         //Errai marshalling
     }
 
     public UserManagerCapabilities( final boolean isAddUserSupported,
-                                    final boolean isUpdateUserSupported,
-                                    final boolean isDeleteUsersupported ) {
+                                    final boolean isUpdateUserPasswordSupported,
+                                    final boolean isDeleteUserSupported,
+                                    final boolean isUpdateUserRolesSupported ) {
         this.isAddUserSupported = isAddUserSupported;
-        this.isUpdateUserSupported = isUpdateUserSupported;
-        this.isDeleteUsersupported = isDeleteUsersupported;
+        this.isUpdateUserPasswordSupported = isUpdateUserPasswordSupported;
+        this.isDeleteUserSupported = isDeleteUserSupported;
+        this.isUpdateUserRolesSupported = isUpdateUserRolesSupported;
     }
 
     public boolean isAddUserSupported() {
         return isAddUserSupported;
     }
 
-    public boolean isUpdateUserSupported() {
-        return isUpdateUserSupported;
+    public boolean isUpdateUserPasswordSupported() {
+        return isUpdateUserPasswordSupported;
     }
 
     public boolean isDeleteUserSupported() {
-        return isDeleteUsersupported;
+        return isDeleteUserSupported;
     }
+
+    public boolean isUpdateUserRolesSupported() {
+        return isUpdateUserRolesSupported;
+    }
+
 }

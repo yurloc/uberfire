@@ -3,7 +3,6 @@ package org.uberfire.security.server.auth.source;
 import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -20,6 +19,7 @@ import org.uberfire.security.auth.Credential;
 import org.uberfire.security.auth.Principal;
 import org.uberfire.security.auth.RoleProvider;
 import org.uberfire.security.impl.RoleImpl;
+import org.uberfire.security.impl.auth.PrincipalImpl;
 import org.uberfire.security.impl.auth.UserNameCredential;
 import org.uberfire.security.server.auth.source.adapter.RolesAdapter;
 
@@ -34,21 +34,13 @@ public class JACCAuthenticationSource implements AuthenticationSource,
     public static final String DEFAULT_ROLE_PRINCIPLE_NAME = "Roles";
     private String rolePrincipleName = DEFAULT_ROLE_PRINCIPLE_NAME;
 
-    private Map<String, ?> options = new HashMap<String, Object>();
-
     private ServiceLoader<RolesAdapter> rolesAdapterServiceLoader = ServiceLoader.load( RolesAdapter.class );
 
     @Override
     public void initialize( Map<String, ?> options ) {
-        this.options = options;
         if ( options.containsKey( ROLES_IN_CONTEXT_KEY ) ) {
             rolePrincipleName = (String) options.get( ROLES_IN_CONTEXT_KEY );
         }
-    }
-
-    @Override
-    public Map<String, ?> getOptions() {
-        return this.options;
     }
 
     @Override
@@ -62,7 +54,9 @@ public class JACCAuthenticationSource implements AuthenticationSource,
     @Override
     public boolean authenticate( final Credential credential,
                                  final SecurityContext securityContext ) {
-        final UserNameCredential userNameCredential = checkInstanceOf( "credential", credential, UserNameCredential.class );
+        final UserNameCredential userNameCredential = checkInstanceOf( "credential",
+                                                                       credential,
+                                                                       UserNameCredential.class );
         try {
             Subject subject = (Subject) PolicyContext.getContext( "javax.security.auth.Subject.container" );
 
@@ -81,6 +75,57 @@ public class JACCAuthenticationSource implements AuthenticationSource,
             LOG.error( e.getMessage() );
         }
         return false;
+    }
+
+    @Override
+    public List<Principal> loadPrincipals() {
+        final List<Principal> principals = new ArrayList<Principal>();
+        try {
+            final Subject subject = (Subject) PolicyContext.getContext( "javax.security.auth.Subject.container" );
+
+            if ( subject != null ) {
+                final Set<java.security.Principal> jaccPrincipals = subject.getPrincipals();
+                if ( jaccPrincipals != null ) {
+                    for ( java.security.Principal jaccPrincipal : jaccPrincipals ) {
+                        principals.add( new PrincipalImpl( jaccPrincipal.getName() ) );
+                    }
+                }
+            }
+
+        } catch ( Exception e ) {
+            LOG.error( e.getMessage() );
+        }
+        return principals;
+    }
+
+    @Override
+    public boolean supportsAddUser() {
+        return false;
+    }
+
+    @Override
+    public void addUser( final Credential credential ) {
+        throw new UnsupportedOperationException( "addUser() is not supported." );
+    }
+
+    @Override
+    public boolean supportsUpdatePassword() {
+        return false;
+    }
+
+    @Override
+    public void updatePassword( final Credential credential ) {
+        throw new UnsupportedOperationException( "updatePassword() is not supported." );
+    }
+
+    @Override
+    public boolean supportsDeleteUser() {
+        return false;
+    }
+
+    @Override
+    public void deleteUser( final Credential credential ) {
+        throw new UnsupportedOperationException( "deleteUser() is not supported." );
     }
 
     @Override
@@ -130,4 +175,16 @@ public class JACCAuthenticationSource implements AuthenticationSource,
             return null;
         }
     }
+
+    @Override
+    public boolean supportsRoleUpdates() {
+        return false;
+    }
+
+    @Override
+    public void updateRoles( Principal principal,
+                             List<Role> roles ) {
+        throw new UnsupportedOperationException( "updateRoles() is not supported." );
+    }
+
 }

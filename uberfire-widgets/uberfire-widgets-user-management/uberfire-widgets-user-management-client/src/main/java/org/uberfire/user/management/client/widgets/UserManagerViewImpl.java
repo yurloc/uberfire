@@ -170,10 +170,11 @@ public class UserManagerViewImpl extends Composite implements UserManagementView
         this.dataProvider = new ListDataProvider<UserInformation>( content.getUserInformation() );
         this.dataProvider.addDataDisplay( table );
         final boolean isAddUserSupported = content.getCapabilities().isAddUserSupported();
-        final boolean isUpdateUserSupported = content.getCapabilities().isUpdateUserSupported();
+        final boolean isUpdateUserPasswordSupported = content.getCapabilities().isUpdateUserPasswordSupported();
         final boolean isDeleteUserSupported = content.getCapabilities().isDeleteUserSupported();
+        final boolean isUpdateUserRolesSupported = content.getCapabilities().isUpdateUserRolesSupported();
         addUserButton.setEnabled( !isReadOnly && isAddUserSupported );
-        editUserButton.setEnabled( !isReadOnly && isUpdateUserSupported );
+        editUserButton.setEnabled( !isReadOnly && isUpdateUserPasswordSupported && isUpdateUserRolesSupported );
         deleteUserButton.setEnabled( !isReadOnly && isDeleteUserSupported );
     }
 

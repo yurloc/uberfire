@@ -479,16 +479,6 @@
         <artifactId>uberfire-widgets-user-management-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.uberfire</groupId>
-        <artifactId>uberfire-widgets-user-management-bridges-debug</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.uberfire</groupId>
-        <artifactId>uberfire-widgets-user-management-bridges-properties-file</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
     </dependencies>
 

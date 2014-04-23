@@ -18,7 +18,6 @@
     <module>uberfire-widgets-user-management-api</module>
     <module>uberfire-widgets-user-management-backend</module>
     <module>uberfire-widgets-user-management-client</module>
-    <module>uberfire-widgets-user-management-bridges</module>
   </modules>
 
 </project>
