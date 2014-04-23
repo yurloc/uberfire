@@ -65,7 +65,8 @@ public class UserManagerViewImpl extends Composite implements UserManagementView
 
     private boolean isReadOnly = false;
     private ButtonCell deleteUserButton;
-    private ButtonCell editUserButton;
+    private ButtonCell editUserRolesButton;
+    private ButtonCell editUserPasswordButton;
 
     private UserManagementPresenter presenter;
 
@@ -96,23 +97,43 @@ public class UserManagerViewImpl extends Composite implements UserManagementView
 
         };
 
-        editUserButton = new ButtonCell( ButtonSize.SMALL );
-        editUserButton.setType( ButtonType.DEFAULT );
-        editUserButton.setIcon( IconType.EDIT );
-        final Column<UserInformation, String> editUserColumn = new Column<UserInformation, String>( editUserButton ) {
+        editUserRolesButton = new ButtonCell( ButtonSize.SMALL );
+        editUserRolesButton.setType( ButtonType.DEFAULT );
+        editUserRolesButton.setIcon( IconType.EDIT );
+        final Column<UserInformation, String> editUserRolesColumn = new Column<UserInformation, String>( editUserRolesButton ) {
             @Override
             public String getValue( final UserInformation userInformation ) {
-                return UserManagementConstants.INSTANCE.edit();
+                return UserManagementConstants.INSTANCE.editRoles();
             }
         };
-        editUserColumn.setFieldUpdater( new FieldUpdater<UserInformation, String>() {
+        editUserRolesColumn.setFieldUpdater( new FieldUpdater<UserInformation, String>() {
             public void update( final int index,
                                 final UserInformation userInformation,
                                 final String value ) {
                 if ( isReadOnly ) {
                     return;
                 }
-                presenter.editUser( userInformation );
+                presenter.editUserRoles( userInformation );
+            }
+        } );
+
+        editUserPasswordButton = new ButtonCell( ButtonSize.SMALL );
+        editUserPasswordButton.setType( ButtonType.DEFAULT );
+        editUserPasswordButton.setIcon( IconType.EDIT );
+        final Column<UserInformation, String> editUserPasswordColumn = new Column<UserInformation, String>( editUserPasswordButton ) {
+            @Override
+            public String getValue( final UserInformation userInformation ) {
+                return UserManagementConstants.INSTANCE.editPassword();
+            }
+        };
+        editUserPasswordColumn.setFieldUpdater( new FieldUpdater<UserInformation, String>() {
+            public void update( final int index,
+                                final UserInformation userInformation,
+                                final String value ) {
+                if ( isReadOnly ) {
+                    return;
+                }
+                presenter.editUserPassword( userInformation );
             }
         } );
 
@@ -146,14 +167,17 @@ public class UserManagerViewImpl extends Composite implements UserManagementView
                          new ResizableHeader( UserManagementConstants.INSTANCE.userRoles(),
                                               table,
                                               userRolesColumn ) );
-        table.addColumn( editUserColumn,
-                         UserManagementConstants.INSTANCE.edit() );
+        table.addColumn( editUserPasswordColumn,
+                         UserManagementConstants.INSTANCE.editPassword() );
+        table.addColumn( editUserRolesColumn,
+                         UserManagementConstants.INSTANCE.editRoles() );
         table.addColumn( deleteUserColumn,
                          UserManagementConstants.INSTANCE.remove() );
 
         //Default to disabled, until we know what features are supported
         addUserButton.setEnabled( false );
-        editUserButton.setEnabled( false );
+        editUserRolesButton.setEnabled( false );
+        editUserPasswordButton.setEnabled( false );
         deleteUserButton.setEnabled( false );
     }
 
@@ -170,11 +194,12 @@ public class UserManagerViewImpl extends Composite implements UserManagementView
         this.dataProvider = new ListDataProvider<UserInformation>( content.getUserInformation() );
         this.dataProvider.addDataDisplay( table );
         final boolean isAddUserSupported = content.getCapabilities().isAddUserSupported();
+        final boolean isUpdateUserRolesSupported = content.getCapabilities().isUpdateUserRolesSupported();
         final boolean isUpdateUserPasswordSupported = content.getCapabilities().isUpdateUserPasswordSupported();
         final boolean isDeleteUserSupported = content.getCapabilities().isDeleteUserSupported();
-        final boolean isUpdateUserRolesSupported = content.getCapabilities().isUpdateUserRolesSupported();
         addUserButton.setEnabled( !isReadOnly && isAddUserSupported );
-        editUserButton.setEnabled( !isReadOnly && isUpdateUserPasswordSupported && isUpdateUserRolesSupported );
+        editUserRolesButton.setEnabled( !isReadOnly && isUpdateUserRolesSupported );
+        editUserPasswordButton.setEnabled( !isReadOnly && isUpdateUserPasswordSupported );
         deleteUserButton.setEnabled( !isReadOnly && isDeleteUserSupported );
     }
 

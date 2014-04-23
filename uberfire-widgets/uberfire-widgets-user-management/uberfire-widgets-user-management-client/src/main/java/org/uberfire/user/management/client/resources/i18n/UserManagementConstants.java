@@ -42,7 +42,9 @@ public interface UserManagementConstants
 
     String remove();
 
-    String edit();
+    String editRoles();
+
+    String editPassword();
 
     String addUserPopupTitle();
 

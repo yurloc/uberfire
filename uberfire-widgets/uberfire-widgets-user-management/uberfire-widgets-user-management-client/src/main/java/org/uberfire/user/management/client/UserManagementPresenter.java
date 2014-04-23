@@ -31,7 +31,8 @@ import org.uberfire.client.mvp.UberView;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.user.management.client.popups.AddUserPopup;
-import org.uberfire.user.management.client.popups.EditUserPopup;
+import org.uberfire.user.management.client.popups.EditUserPasswordPopup;
+import org.uberfire.user.management.client.popups.EditUserRolesPopup;
 import org.uberfire.user.management.client.resources.i18n.UserManagementConstants;
 import org.uberfire.user.management.client.utils.UserManagementUtils;
 import org.uberfire.user.management.client.widgets.UserManagementViewController;
@@ -49,7 +50,10 @@ public class UserManagementPresenter {
     private AddUserPopup addUserPopup;
 
     @Inject
-    private EditUserPopup editUserPopup;
+    private EditUserRolesPopup editUserRolesPopup;
+
+    @Inject
+    private EditUserPasswordPopup editUserPasswordPopup;
 
     @Inject
     private Caller<UserManagementService> userManagementService;
@@ -152,30 +156,16 @@ public class UserManagementPresenter {
                                   ).deleteUser( userInformation );
     }
 
-    public void editUser( final UserInformation oldUserInformation ) {
-        editUserPopup.setCallbackCommand( new Command() {
+    public void editUserRoles( final UserInformation oldUserInformation ) {
+        editUserRolesPopup.setCallbackCommand( new Command() {
 
             @Override
             public void execute() {
                 final String userName = oldUserInformation.getUserName();
-                final String userPassword = editUserPopup.getUserPassword();
-                final boolean isUserPasswordChanged = editUserPopup.isPasswordChanged();
-                final Set<String> userRoles = UserManagementUtils.convertUserRoles( editUserPopup.getUserRoles() );
+                final Set<String> userRoles = UserManagementUtils.convertUserRoles( editUserRolesPopup.getUserRoles() );
 
                 final UserInformation newUserInformation = new UserInformation( userName,
                                                                                 userRoles );
-                if ( isUserPasswordChanged ) {
-                    updateUser( oldUserInformation,
-                                newUserInformation,
-                                userPassword );
-                } else {
-                    updateUser( oldUserInformation,
-                                newUserInformation );
-                }
-            }
-
-            private void updateUser( final UserInformation oldUserInformation,
-                                     final UserInformation newUserInformation ) {
                 userManagementService.call( new RemoteCallback<Void>() {
                                                 @Override
                                                 public void callback( final Void o ) {
@@ -195,14 +185,21 @@ public class UserManagementPresenter {
                                           ).updateUser( newUserInformation );
             }
 
-            private void updateUser( final UserInformation oldUserInformation,
-                                     final UserInformation newUserInformation,
-                                     final String userPassword ) {
+        } );
+        editUserRolesPopup.setUserInformation( oldUserInformation );
+        editUserRolesPopup.show();
+    }
+
+    public void editUserPassword( final UserInformation userInformation ) {
+        editUserPasswordPopup.setCallbackCommand( new Command() {
+
+            @Override
+            public void execute() {
+                final String userPassword = editUserPasswordPopup.getUserPassword();
                 userManagementService.call( new RemoteCallback<Void>() {
                                                 @Override
                                                 public void callback( final Void o ) {
-                                                    view.updateUser( oldUserInformation,
-                                                                     newUserInformation );
+                                                    //Do nothing. Passwords are not presented in the UI
                                                 }
                                             },
                                             new ErrorCallback<Message>() {
@@ -214,14 +211,13 @@ public class UserManagementPresenter {
                                                     return false;
                                                 }
                                             }
-                                          ).updateUser( newUserInformation,
+                                          ).updateUser( userInformation,
                                                         userPassword );
             }
 
         } );
-        editUserPopup.setUserInformation( oldUserInformation );
-        editUserPopup.show();
-
+        editUserPasswordPopup.setUserInformation( userInformation );
+        editUserPasswordPopup.show();
     }
 
 }

@@ -21,7 +21,6 @@ import com.github.gwtbootstrap.client.ui.HelpInline;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.google.gwt.core.client.GWT;
@@ -33,18 +32,17 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
 import org.uberfire.client.common.popups.footers.ModalFooterOKCancelButtons;
 import org.uberfire.user.management.client.resources.i18n.UserManagementConstants;
-import org.uberfire.user.management.client.utils.UserManagementUtils;
 import org.uberfire.user.management.model.UserInformation;
 
-public class EditUserPopup extends Modal {
+public class EditUserPasswordPopup extends Modal {
 
-    interface EditUserPopupBinder
+    interface EditUserRolesPopupBinder
             extends
-            UiBinder<Widget, EditUserPopup> {
+            UiBinder<Widget, EditUserPasswordPopup> {
 
     }
 
-    private static EditUserPopupBinder uiBinder = GWT.create( EditUserPopupBinder.class );
+    private static EditUserRolesPopupBinder uiBinder = GWT.create( EditUserRolesPopupBinder.class );
 
     @UiField
     ControlGroup userNameGroup;
@@ -70,18 +68,7 @@ public class EditUserPopup extends Modal {
     @UiField
     HelpInline userPasswordRepeatHelpInline;
 
-    @UiField
-    ControlGroup userRolesGroup;
-
-    @UiField
-    TextBox userRolesTextBox;
-
-    @UiField
-    HelpInline userRolesHelpInline;
-
     private Command callbackCommand;
-
-    private boolean isPasswordChanged;
 
     private final Command okCommand = new Command() {
         @Override
@@ -100,7 +87,7 @@ public class EditUserPopup extends Modal {
     private final ModalFooterOKCancelButtons footer = new ModalFooterOKCancelButtons( okCommand,
                                                                                       cancelCommand );
 
-    public EditUserPopup() {
+    public EditUserPasswordPopup() {
         setTitle( UserManagementConstants.INSTANCE.addUserPopupTitle() );
         setBackdrop( BackdropType.STATIC );
         setKeyboard( true );
@@ -115,7 +102,6 @@ public class EditUserPopup extends Modal {
             public void onKeyPress( final KeyPressEvent event ) {
                 userPasswordGroup.setType( ControlGroupType.NONE );
                 userPasswordHelpInline.setText( "" );
-                isPasswordChanged = true;
             }
         } );
         userPasswordRepeatTextBox.addKeyPressHandler( new KeyPressHandler() {
@@ -123,14 +109,6 @@ public class EditUserPopup extends Modal {
             public void onKeyPress( final KeyPressEvent event ) {
                 userPasswordRepeatGroup.setType( ControlGroupType.NONE );
                 userPasswordRepeatHelpInline.setText( "" );
-                isPasswordChanged = true;
-            }
-        } );
-        userRolesTextBox.addKeyPressHandler( new KeyPressHandler() {
-            @Override
-            public void onKeyPress( final KeyPressEvent event ) {
-                userRolesGroup.setType( ControlGroupType.NONE );
-                userRolesHelpInline.setText( "" );
             }
         } );
     }
@@ -138,46 +116,35 @@ public class EditUserPopup extends Modal {
     private void onOKButtonClick() {
         boolean hasError = false;
 
-        if ( isPasswordChanged ) {
-            if ( userPasswordTextBox.getText() == null || userPasswordTextBox.getText().trim().isEmpty() ) {
-                userPasswordGroup.setType( ControlGroupType.ERROR );
-                userPasswordHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordIsMandatory() );
-                hasError = true;
-            } else {
-                userPasswordGroup.setType( ControlGroupType.NONE );
-                userPasswordHelpInline.setText( "" );
-            }
-
-            if ( userPasswordRepeatTextBox.getText() == null || userPasswordRepeatTextBox.getText().trim().isEmpty() ) {
-                userPasswordRepeatGroup.setType( ControlGroupType.ERROR );
-                userPasswordRepeatHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordIsMandatory() );
-                hasError = true;
-            } else {
-                userPasswordRepeatGroup.setType( ControlGroupType.NONE );
-                userPasswordRepeatHelpInline.setText( "" );
-            }
-
-            if ( !userPasswordTextBox.getText().equals( userPasswordRepeatTextBox.getText() ) ) {
-                userPasswordGroup.setType( ControlGroupType.ERROR );
-                userPasswordHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordsDoNotMatch() );
-                userPasswordRepeatGroup.setType( ControlGroupType.ERROR );
-                userPasswordRepeatHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordsDoNotMatch() );
-                hasError = true;
-            } else if ( hasError == false ) {
-                userPasswordGroup.setType( ControlGroupType.NONE );
-                userPasswordRepeatGroup.setType( ControlGroupType.NONE );
-                userPasswordHelpInline.setText( "" );
-                userPasswordRepeatHelpInline.setText( "" );
-            }
-        }
-
-        if ( userRolesTextBox.getText() == null || userRolesTextBox.getText().trim().isEmpty() ) {
-            userRolesGroup.setType( ControlGroupType.ERROR );
-            userRolesHelpInline.setText( UserManagementConstants.INSTANCE.userRolesIsMandatory() );
+        if ( userPasswordTextBox.getText() == null || userPasswordTextBox.getText().trim().isEmpty() ) {
+            userPasswordGroup.setType( ControlGroupType.ERROR );
+            userPasswordHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordIsMandatory() );
             hasError = true;
         } else {
-            userRolesGroup.setType( ControlGroupType.NONE );
-            userRolesHelpInline.setText( "" );
+            userPasswordGroup.setType( ControlGroupType.NONE );
+            userPasswordHelpInline.setText( "" );
+        }
+
+        if ( userPasswordRepeatTextBox.getText() == null || userPasswordRepeatTextBox.getText().trim().isEmpty() ) {
+            userPasswordRepeatGroup.setType( ControlGroupType.ERROR );
+            userPasswordRepeatHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordIsMandatory() );
+            hasError = true;
+        } else {
+            userPasswordRepeatGroup.setType( ControlGroupType.NONE );
+            userPasswordRepeatHelpInline.setText( "" );
+        }
+
+        if ( !userPasswordTextBox.getText().equals( userPasswordRepeatTextBox.getText() ) ) {
+            userPasswordGroup.setType( ControlGroupType.ERROR );
+            userPasswordHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordsDoNotMatch() );
+            userPasswordRepeatGroup.setType( ControlGroupType.ERROR );
+            userPasswordRepeatHelpInline.setText( UserManagementConstants.INSTANCE.userPasswordsDoNotMatch() );
+            hasError = true;
+        } else if ( hasError == false ) {
+            userPasswordGroup.setType( ControlGroupType.NONE );
+            userPasswordRepeatGroup.setType( ControlGroupType.NONE );
+            userPasswordHelpInline.setText( "" );
+            userPasswordRepeatHelpInline.setText( "" );
         }
 
         if ( hasError ) {
@@ -192,29 +159,18 @@ public class EditUserPopup extends Modal {
 
     @Override
     public void show() {
-        isPasswordChanged = false;
         userPasswordTextBox.setText( "" );
         userPasswordRepeatTextBox.setText( "" );
         userNameGroup.setType( ControlGroupType.NONE );
         userPasswordGroup.setType( ControlGroupType.NONE );
         userPasswordRepeatGroup.setType( ControlGroupType.NONE );
-        userRolesGroup.setType( ControlGroupType.NONE );
         userPasswordHelpInline.setText( "" );
         userPasswordRepeatHelpInline.setText( "" );
-        userRolesHelpInline.setText( "" );
         super.show();
-    }
-
-    public boolean isPasswordChanged() {
-        return this.isPasswordChanged;
     }
 
     public String getUserPassword() {
         return userPasswordTextBox.getText();
-    }
-
-    public String getUserRoles() {
-        return userRolesTextBox.getText();
     }
 
     public void setCallbackCommand( final Command callbackCommand ) {
@@ -223,7 +179,6 @@ public class EditUserPopup extends Modal {
 
     public void setUserInformation( final UserInformation userInformation ) {
         this.userNameLabel.setText( userInformation.getUserName() );
-        this.userRolesTextBox.setText( UserManagementUtils.convertUserRoles( userInformation.getUserRoles() ) );
     }
 
 }

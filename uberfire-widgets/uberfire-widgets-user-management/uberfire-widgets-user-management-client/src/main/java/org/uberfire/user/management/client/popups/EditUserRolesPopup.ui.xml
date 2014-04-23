@@ -22,7 +22,7 @@
 
   <b:Well>
     <b:Fieldset>
-      <b:Legend>Edit User
+      <b:Legend>Edit User Roles
         <small>* is required</small>
       </b:Legend>
       <b:ControlGroup ui:field="userNameGroup">
@@ -31,26 +31,6 @@
         </b:ControlLabel>
         <b:Controls>
           <b:Label ui:field="userNameLabel" />
-        </b:Controls>
-      </b:ControlGroup>
-      <b:ControlGroup ui:field="userPasswordGroup">
-        <b:ControlLabel for="userPassword">
-          <font color="red">*</font>
-          Password:
-        </b:ControlLabel>
-        <b:Controls>
-          <b:PasswordTextBox b:id="userPassword" ui:field="userPasswordTextBox" placeholder="New Password..."/>
-          <b:HelpInline ui:field="userPasswordHelpInline"/>
-        </b:Controls>
-      </b:ControlGroup>
-      <b:ControlGroup ui:field="userPasswordRepeatGroup">
-        <b:ControlLabel for="userPasswordRepeat">
-          <font color="red">*</font>
-          Repeat password:
-        </b:ControlLabel>
-        <b:Controls>
-          <b:PasswordTextBox b:id="userPasswordRepeat" ui:field="userPasswordRepeatTextBox" placeholder="Repeat new password..."/>
-          <b:HelpInline ui:field="userPasswordRepeatHelpInline"/>
         </b:Controls>
       </b:ControlGroup>
       <b:ControlGroup ui:field="userRolesGroup">
