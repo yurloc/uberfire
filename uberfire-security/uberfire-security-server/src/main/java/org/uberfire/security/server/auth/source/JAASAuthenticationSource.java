@@ -168,8 +168,8 @@ public class JAASAuthenticationSource implements AuthenticationSource,
     }
 
     @Override
-    public void updateRoles( Principal principal,
-                             List<Role> roles ) {
+    public void updateRoles( final Principal principal,
+                             final List<Role> roles ) {
         throw new UnsupportedOperationException( "updateRoles() is not supported." );
     }
 

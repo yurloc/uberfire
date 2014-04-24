@@ -34,6 +34,7 @@ import org.uberfire.security.auth.Principal;
 import org.uberfire.security.auth.RoleProvider;
 import org.uberfire.security.impl.RoleImpl;
 import org.uberfire.security.impl.auth.PrincipalImpl;
+import org.uberfire.security.impl.auth.UserNameCredential;
 import org.uberfire.security.impl.auth.UsernamePasswordCredential;
 
 import static org.uberfire.commons.validation.Preconditions.*;
@@ -46,6 +47,11 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
     private boolean alreadyInit = false;
     private String usersQuery;
     private String userAuthenticationQuery;
+    private String updateUserPasswordQuery;
+    private String addUserQuery;
+    private String deleteUserQuery;
+    private String addUserRolesQuery;
+    private String deleteUserRolesQuery;
     private String userRolesQuery;
 
     public abstract Connection getConnection();
@@ -58,17 +64,47 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
             }
             LOG.debug( "usersQuery = " + usersQuery );
 
-            userAuthenticationQuery = "select 1 from " + options.get( "userTable" ) + " where " + options.get( "userField" ) + "=? and " + options.get( "passwordField" ) + "=?";
+            userAuthenticationQuery = "select 1 from " + options.get( "userTable" ) + " where " + options.get( "userField" ) + "= ? and " + options.get( "passwordField" ) + "= ?";
             if ( options.containsKey( "userAuthenticationQuery" ) ) {
                 userAuthenticationQuery = (String) options.get( "userAuthenticationQuery" );
             }
             LOG.debug( "userAuthenticationQuery = " + userAuthenticationQuery );
 
-            userRolesQuery = "select " + options.get( "userRoleRoleField" ) + " from " + options.get( "userRoleTable" ) + " where " + options.get( "userRoleUserField" ) + "=?";
+            updateUserPasswordQuery = "update " + options.get( "userTable" ) + " set " + options.get( "passwordField" ) + " = ? where " + options.get( "userField" ) + " = ?";
+            if ( options.containsKey( "updateUserPasswordQuery" ) ) {
+                updateUserPasswordQuery = (String) options.get( "updateUserPasswordQuery" );
+            }
+            LOG.debug( "updateUserPasswordQuery = " + updateUserPasswordQuery );
+
+            addUserQuery = "insert into " + options.get( "userTable" ) + "(" + options.get( "userField" ) + ", " + options.get( "passwordField" ) + ") values (?, ?)";
+            if ( options.containsKey( "addUserQuery" ) ) {
+                addUserQuery = (String) options.get( "addUserQuery" );
+            }
+            LOG.debug( "addUserQuery = " + addUserQuery );
+
+            deleteUserQuery = "delete from " + options.get( "userTable" ) + " where " + options.get( "userField" ) + " = ?";
+            if ( options.containsKey( "deleteUserQuery" ) ) {
+                deleteUserQuery = (String) options.get( "deleteUserQuery" );
+            }
+            LOG.debug( "deleteUserQuery = " + deleteUserQuery );
+
+            userRolesQuery = "select " + options.get( "userRoleRoleField" ) + " from " + options.get( "userRoleTable" ) + " where " + options.get( "userRoleUserField" ) + "= ?";
             if ( options.containsKey( "userRolesQuery" ) ) {
                 userRolesQuery = (String) options.get( "userRolesQuery" );
             }
             LOG.debug( "userRolesQuery = " + userRolesQuery );
+
+            addUserRolesQuery = "insert into " + options.get( "userRoleTable" ) + "(" + options.get( "userRoleUserField" ) + ", " + options.get( "userRoleRoleField" ) + ") values (?, ?)";
+            if ( options.containsKey( "addUserRolesQuery" ) ) {
+                addUserRolesQuery = (String) options.get( "addUserRolesQuery" );
+            }
+            LOG.debug( "addUserRolesQuery = " + addUserRolesQuery );
+
+            deleteUserRolesQuery = "delete from " + options.get( "userRoleTable" ) + " where " + options.get( "userRoleUserField" ) + " = ?";
+            if ( options.containsKey( "deleteUserRolesQuery" ) ) {
+                deleteUserRolesQuery = (String) options.get( "deleteUserRolesQuery" );
+            }
+            LOG.debug( "deleteUserRolesQuery = " + deleteUserRolesQuery );
 
             alreadyInit = true;
         }
@@ -157,36 +193,121 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
 
     @Override
     public boolean supportsAddUser() {
-        return false;
+        return true;
     }
 
     @Override
     public void addUser( final Credential credential ) {
-        throw new UnsupportedOperationException( "addUser() is not supported." );
+        final UsernamePasswordCredential usernamePassword = checkInstanceOf( "credential",
+                                                                             credential,
+                                                                             UsernamePasswordCredential.class );
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            final PreparedStatement statement = connection.prepareStatement( addUserQuery );
+            statement.setString( 1,
+                                 usernamePassword.getUserName() );
+            statement.setObject( 2,
+                                 usernamePassword.getPassword() );
+            statement.executeQuery();
+            statement.close();
+
+        } catch ( Exception ex ) {
+            throw new IllegalStateException( ex );
+        } finally {
+            if ( connection != null ) {
+                try {
+                    connection.close();
+                } catch ( SQLException e ) {
+                    throw new IllegalStateException( e );
+                }
+            }
+        }
     }
 
     @Override
     public boolean supportsUpdatePassword() {
-        return false;
+        return true;
     }
 
     @Override
     public void updatePassword( final Credential credential ) {
-        throw new UnsupportedOperationException( "updatePassword() is not supported." );
+        final UsernamePasswordCredential usernamePassword = checkInstanceOf( "credential",
+                                                                             credential,
+                                                                             UsernamePasswordCredential.class );
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            final PreparedStatement statement = connection.prepareStatement( updateUserPasswordQuery );
+            statement.setObject( 1,
+                                 usernamePassword.getPassword() );
+            statement.setString( 2,
+                                 usernamePassword.getUserName() );
+            statement.executeQuery();
+            statement.close();
+
+        } catch ( Exception ex ) {
+            throw new IllegalStateException( ex );
+        } finally {
+            if ( connection != null ) {
+                try {
+                    connection.close();
+                } catch ( SQLException e ) {
+                    throw new IllegalStateException( e );
+                }
+            }
+        }
     }
 
     @Override
     public boolean supportsDeleteUser() {
-        return false;
+        return true;
     }
 
     @Override
     public void deleteUser( final Credential credential ) {
-        throw new UnsupportedOperationException( "deleteUser() is not supported." );
+        final UserNameCredential username = checkInstanceOf( "credential",
+                                                             credential,
+                                                             UserNameCredential.class );
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            final PreparedStatement deleteUserStatement = connection.prepareStatement( deleteUserQuery );
+            deleteUserStatement.setString( 1,
+                                           username.getUserName() );
+            deleteUserStatement.executeQuery();
+            deleteUserStatement.close();
+
+            //Don't assume the RDBMS has a cascade delete trigger
+            final PreparedStatement deleteUserRolesStatement = connection.prepareStatement( deleteUserRolesQuery );
+            deleteUserRolesStatement.setString( 1,
+                                                username.getUserName() );
+            deleteUserRolesStatement.executeQuery();
+            deleteUserRolesStatement.close();
+
+        } catch ( Exception ex ) {
+            throw new IllegalStateException( ex );
+        } finally {
+            if ( connection != null ) {
+                try {
+                    connection.close();
+                } catch ( SQLException e ) {
+                    throw new IllegalStateException( e );
+                }
+            }
+        }
     }
 
     @Override
     public List<Role> loadRoles( final Principal principal ) {
+        checkNotNull( "principal",
+                      principal );
         Connection connection = null;
         try {
             connection = getConnection();
@@ -220,13 +341,47 @@ public abstract class AbstractDatabaseAuthSource implements AuthenticationSource
 
     @Override
     public boolean supportsRoleUpdates() {
-        return false;
+        return true;
     }
 
     @Override
-    public void updateRoles( Principal principal,
-                             List<Role> roles ) {
-        throw new UnsupportedOperationException( "updateRoles() is not supported." );
+    public void updateRoles( final Principal principal,
+                             final List<Role> roles ) {
+        checkNotNull( "principal",
+                      principal );
+        checkNotNull( "roles",
+                      roles );
+
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            final PreparedStatement deleteUserRolesStatement = connection.prepareStatement( deleteUserRolesQuery );
+            deleteUserRolesStatement.setString( 1,
+                                                principal.getName() );
+            deleteUserRolesStatement.executeQuery();
+            deleteUserRolesStatement.close();
+
+            final PreparedStatement addUserRolesStatement = connection.prepareStatement( addUserRolesQuery );
+            addUserRolesStatement.setString( 1,
+                                             principal.getName() );
+            for ( Role role : roles ) {
+                addUserRolesStatement.setString( 2,
+                                                 role.getName() );
+                addUserRolesStatement.executeQuery();
+            }
+            addUserRolesStatement.close();
+
+        } catch ( Exception ex ) {
+            throw new IllegalStateException( ex );
+        } finally {
+            if ( connection != null ) {
+                try {
+                    connection.close();
+                } catch ( SQLException e ) {
+                    throw new IllegalStateException( e );
+                }
+            }
+        }
     }
 
 }
