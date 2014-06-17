@@ -113,6 +113,7 @@ public class ConfigurationServiceImpl implements ConfigurationService,
         if ( System.getProperty( MONITOR_DISABLED ) == null ) {
             configUpdates = new CheckConfigurationUpdates( fs.newWatchService() );
             final ConfigServiceWatchServiceExecutor configServiceWatchServiceExecutor = getWatchServiceExecutor();
+            configServiceWatchServiceExecutor.toString();
             executorService.execute( new DescriptiveRunnable() {
                 @Override
                 public String getDescription() {
