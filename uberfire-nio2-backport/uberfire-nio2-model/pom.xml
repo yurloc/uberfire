@@ -59,7 +59,8 @@
             </Import-Package>
             <Private-Package></Private-Package>
             <Export-Package>
-              *
+              org.apache.commons.io.*,
+              org.uberfire.java.nio.*
             </Export-Package>
           </instructions>
         </configuration>
