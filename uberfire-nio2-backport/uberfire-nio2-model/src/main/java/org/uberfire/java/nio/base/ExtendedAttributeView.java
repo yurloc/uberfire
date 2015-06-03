@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.uberfire.java.nio.IOException;
 import org.uberfire.java.nio.file.attribute.AttributeView;
+import org.uberfire.java.nio.file.attribute.BasicFileAttributeView;
 import org.uberfire.java.nio.file.attribute.BasicFileAttributes;
 
 public interface ExtendedAttributeView extends AttributeView {
@@ -33,7 +34,7 @@ public interface ExtendedAttributeView extends AttributeView {
     void setAttribute( final String attribute,
                        final Object value ) throws IOException;
 
-    Class[] viewTypes();
+    Class<? extends BasicFileAttributeView>[] viewTypes();
 
     boolean isSerializable();
 }

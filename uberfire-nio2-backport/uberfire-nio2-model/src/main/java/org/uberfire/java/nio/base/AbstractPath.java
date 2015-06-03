@@ -154,7 +154,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             System.arraycopy( path, 0, result, 0, result.length );
         } else {
             final Pair<Integer, Integer> offset = offsets.get( index );
-            result = new byte[ offset.getK2().intValue() - offset.getK1().intValue() ];
+            result = new byte[ offset.getK2() - offset.getK1() ];
             System.arraycopy( path, offset.getK1(), result, 0, result.length );
         }
 
@@ -170,7 +170,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             initPos = offsets.get( beginIndex ).getK1();
         }
         final Pair<Integer, Integer> offsetEnd = offsets.get( endIndex );
-        final byte[] result = new byte[ offsetEnd.getK2().intValue() - initPos ];
+        final byte[] result = new byte[ offsetEnd.getK2() - initPos ];
         System.arraycopy( path, initPos, result, 0, result.length );
 
         return new String( result );
@@ -348,11 +348,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             i++;
         }
 
-        if ( i < path.length && this.path[ i ] != fs.getSeparator().charAt( 0 ) ) {
-            return false;
-        }
-
-        return true;
+        return !( i < path.length && this.path[ i ] != fs.getSeparator().charAt( 0 ) );
     }
 
     @Override
@@ -451,7 +447,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             return this;
         }
 
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(path.length * 2);
         sb.append( new String( path ) );
         if ( path[ path.length - 1 ] != getSeparator() ) {
             sb.append( getSeparator() );
@@ -489,7 +485,7 @@ public abstract class AbstractPath<FS extends FileSystem>
     @Override
     public Path relativize( final Path otherx ) throws IllegalArgumentException {
         checkNotNull( "otherx", otherx );
-        final AbstractPath other = checkInstanceOf( "otherx", otherx, AbstractPath.class );
+        final AbstractPath<?> other = checkInstanceOf( "otherx", otherx, AbstractPath.class );
 
         if ( this.equals( other ) ) {
             return emptyPath();
@@ -522,7 +518,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             return other.subpath( i, other.getNameCount() );
         }
 
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(numberOfDots * 3);
         while ( numberOfDots > 0 ) {
             sb.append( ".." );
             if ( numberOfDots > 1 ) {
@@ -535,7 +531,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             if ( sb.length() > 0 ) {
                 sb.append( getSeparator() );
             }
-            sb.append( ( (AbstractPath<FS>) other.subpath( i, other.getNameCount() ) ).toString( false ) );
+            sb.append( ( (AbstractPath) other.subpath( i, other.getNameCount() ) ).toString( false ) );
         }
 
         return newPath( fs, sb.toString(), host, isRealPath, false );
@@ -610,7 +606,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             return false;
         }
 
-        AbstractPath other = (AbstractPath) o;
+        AbstractPath<?> other = (AbstractPath) o;
 
         if ( isAbsolute != other.isAbsolute ) {
             return false;
@@ -635,11 +631,7 @@ public abstract class AbstractPath<FS extends FileSystem>
             return false;
         }
 
-        if ( usesWindowsFormat && !( new String( path ).equalsIgnoreCase( new String( other.path ) ) ) ) {
-            return false;
-        }
-
-        return true;
+        return !( usesWindowsFormat && !( new String( path ).equalsIgnoreCase( new String( other.path ) ) ) );
     }
 
     @Override
@@ -679,13 +671,13 @@ public abstract class AbstractPath<FS extends FileSystem>
     }
 
     @Override
-    public <V extends AttributeView> V getAttrView( final Class<V> type ) {
+    public <V extends AttributeView> V getAttrView( final Class<?> type ) {
         return attrsStorage.getAttrView( type );
     }
 
     @Override
     public <V extends AttributeView> V getAttrView( final String name ) {
-        return (V) attrsStorage.getAttrView( name );
+        return attrsStorage.getAttrView( name );
     }
 
     public static class RootInfo {

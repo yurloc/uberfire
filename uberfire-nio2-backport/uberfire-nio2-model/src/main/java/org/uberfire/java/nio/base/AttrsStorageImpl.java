@@ -49,7 +49,7 @@ public class AttrsStorageImpl implements AttrsStorage {
     }
 
     @Override
-    public <V extends AttributeView> V getAttrView( final Class<V> type ) {
+    public <V extends AttributeView> V getAttrView( final Class<?> type ) {
         return (V) viewsTypeIndex.get( type );
     }
 

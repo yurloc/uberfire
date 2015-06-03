@@ -24,7 +24,7 @@ public interface AttrHolder {
 
     <V extends AttributeView> void addAttrView( final V view );
 
-    <V extends AttributeView> V getAttrView( final Class<V> type );
+    <V extends AttributeView> V getAttrView( final Class<?> type );
 
     <V extends AttributeView> V getAttrView( final String name );
 
