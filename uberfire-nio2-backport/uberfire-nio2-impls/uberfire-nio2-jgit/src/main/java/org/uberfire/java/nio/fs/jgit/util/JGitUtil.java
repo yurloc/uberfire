@@ -504,7 +504,7 @@ public final class JGitUtil {
         }
     }
 
-    public static List<RevCommit> getCommits( final JGitFileSystem fs,
+    public static List<RevCommit> getCommits( final Git git,
                                               final String branch,
                                               final ObjectId startRange,
                                               final ObjectId endRange ) {
@@ -512,7 +512,7 @@ public final class JGitUtil {
         RevWalk rw = null;
         try {
             // resolve branch
-            rw = new RevWalk( fs.gitRepo().getRepository() );
+            rw = new RevWalk( git.getRepository() );
             rw.markStart( rw.parseCommit( endRange ) );
             if ( startRange != null ) {
                 rw.markUninteresting( rw.parseCommit( startRange ) );

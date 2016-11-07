@@ -41,7 +41,7 @@ public class ConcurrentJGitUtilTest extends AbstractTestInfra {
 
     @BeforeClass
     public static void setup() {
-        JGitUtil.setRetryTimes( 5 );
+//        JGitUtil.setRetryTimes( 5 );
     }
 
     @Test
